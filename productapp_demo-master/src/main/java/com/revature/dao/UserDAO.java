@@ -3,6 +3,7 @@ package com.revature.dao;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -27,11 +28,11 @@ public class UserDAO {
 		});
 		return userList;
 	}
-	
+
 	public User findOne(Integer id) {
 		String sql = "select id,name,email,active from user_account where id = ?";
-		Object[] params = new Object[]{id};
-		User userList = jdbcTemplate.queryForObject(sql, params , (rs, rowno) -> {
+		Object[] params = new Object[] { id };
+		User userList = jdbcTemplate.queryForObject(sql, params, (rs, rowno) -> {
 			User user = new User();
 			user.setId(rs.getInt("id"));
 			user.setName(rs.getString("name"));
@@ -49,28 +50,36 @@ public class UserDAO {
 		int rows = jdbcTemplate.update(sql, params);
 		System.out.println("No of rows inserted:" + rows);
 	}
-	
-	public User login(String email,String password){
-		
+
+	public User login(String email, String password) {
+
 		String sql = "select id,name,email,active from user_account where email = ? and password = ?";
-		Object[] params = new Object[]{email,password};
-		User userList = jdbcTemplate.queryForObject(sql, params , (rs, rowno) -> {
-			User user = new User();
-			user.setId(rs.getInt("id"));
-			user.setName(rs.getString("name"));
-			user.setEmail(rs.getString("email"));
-			user.setActive(rs.getBoolean("active"));
-			return user;
-		});
-		return userList;
-		
-		
+		Object[] params = new Object[] { email, password };
+		User userList;
+		try {
+			userList = jdbcTemplate.queryForObject(sql, params, (rs, rowno) -> {
+				User user = new User();
+				user.setId(rs.getInt("id"));
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setActive(rs.getBoolean("active"));
+				return user;
+			});
+
+			return userList;
+
+		} catch (DataAccessException e) {
+			System.out.println("Login failed");
+		}
+		return null;
+
 	}
-	
+
 	public void update(User user) {
 
 		String sql = "update user_account set name= ?, email = ? , password = ?  ,active = ?  where id = ?";
-		Object[] params = new Object[] { user.getName(), user.getEmail(), user.getPassword(), user.isActive(),user.getId() };
+		Object[] params = new Object[] { user.getName(), user.getEmail(), user.getPassword(), user.isActive(),
+				user.getId() };
 		int rows = jdbcTemplate.update(sql, params);
 		System.out.println("No of rows updated:" + rows);
 	}
@@ -82,7 +91,6 @@ public class UserDAO {
 		int rows = jdbcTemplate.update(sql, params);
 		System.out.println("No of rows deleted:" + rows);
 	}
-
 
 	public void activateAccount(Integer id) {
 

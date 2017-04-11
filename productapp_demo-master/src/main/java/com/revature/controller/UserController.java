@@ -15,6 +15,7 @@ import com.revature.model.User;
 
 @Controller
 @RequestMapping("/users")
+
 public class UserController {
 
 	@Autowired
@@ -63,18 +64,14 @@ public class UserController {
 
 		User user = userDAO.login(email, password);
 
-		if (user!= null) {
+		if (user != null) {
 			System.out.println("Successful Login");
 			return "valid";
-		}
-		else if (user == null)
-		{
+		} else if (user == null) {
 			return "invalid";
 		}
 		return null;
 	}
-	
-	
 
 	@GetMapping("/edit")
 	public String edit(@RequestParam("id") Integer id, ModelMap model) {
